@@ -1,0 +1,22 @@
+{
+  "name": "searchkit-expressjs",
+  "description": "Sample okta usage with node.js",
+   "version": "0.0.0",
+  "main": "index.js",
+ "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Victor Khazanov",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.14.0",
+    "okta-auth": "^0.1.2",
+    "redis": "^2.6.3",
+    "searchkit": "^0.10.1",
+     "passport-saml": "git://github.com/pawanvshah/passport-saml.git",
+    "passport": "^0.2.0",
+    "connect": "^2.14.3"
+  }
+}
