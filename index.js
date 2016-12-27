@@ -1,4 +1,10 @@
 var express = require('express');
+
+
+
+
+
+
 var http = require('http'),
   session = require('express-session'),
   auth = require('./auth');;
@@ -7,11 +13,34 @@ var bodyParser = require('body-parser');
 var compression = require('compression');
 var morgan = require('morgan');
 var multer = require('multer');
+var path    = require("path");
 var app = express();
+
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname + '/public'));
+app.use(express.static('./public'));
+app.use(express.static('public'));
+
+
+
 var genuuid = require('./genuuid');
 
 
+
+var SearchkitExpress = require("searchkit-express");
+
 var server = http.createServer(app);
+
+
+
+
+
+var browserify = require('browserify'),
+    literalify = require('literalify'),
+    React = require('react'),
+    ReactDOMServer = require('react-dom/server');
 
 app.use(morgan('combined'));
 app.use(compression());
@@ -48,15 +77,18 @@ app.get('/login', auth.authenticate('saml', { failureRedirect: '/', failureFlash
 app.use(auth.protected);
 
 app.get('/', auth.protected, function (req, res){
-	  res.end("Hello " + req.session.passport.user);
+	  //res.end("Hello " + req.session.passport.user);
+     
+     res.sendFile(path.join(__dirname+'/index.html'));
+      
 });
 
 app.get('/hello', auth.protected, function (req, res){
 	  res.end("Hello World!");
 });
-
+/*
 app.get('*', function(req, res){
   res.redirect('/');
 });
-
+*/
 app.listen(process.env.PORT || 3001);
