@@ -93,7 +93,7 @@ var MovieHitsTable = function (_React$Component) {
 
             var _desc = "";
 
-            if (hit._source.wikiSpaceKey) {
+           if(hit._source.wikiSpaceKey && (hit._source.wikiSpaceKey=='PUBC9D'|| hit._source.wikiSpaceKey=='PUBSSUD')){
 
               _desc = "(SE Documentation)";
             } else {
