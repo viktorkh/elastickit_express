@@ -71,3 +71,30 @@ color: #7b4672 !important;
   
   display: none;
   }
+
+.span_open_portal{
+
+  text-decoration: underline inportant;
+  color: white !important;
+  
+  
+  }
+  .span_open_case a{
+
+padding: 5px;
+ text-decoration: underline;
+     
+  }
+  .span_open_portal{
+
+  text-decoration: underline;
+  color: white !important;
+  margin-left: 50px; 
+  
+  }
+
+  .span_open_portal a{
+ text-decoration: underline;
+padding: 5px;
+     
+  }
