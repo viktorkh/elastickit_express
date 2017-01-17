@@ -40,7 +40,27 @@ const TermQuery = Searchkit.TermQuery;
 const Panel = Searchkit.Panel;
 const GroupedSelectedFilters = Searchkit.GroupedSelectedFilters;
 
+const ImmutableQuery = Searchkit.ImmutableQuery;
+const QueryString = Searchkit.QueryString;
 
+const customQueryBuilder = (query, options) => {
+
+  return {
+    "bool": {
+        "should": [
+            { 
+                    "query_string": {
+                    "query": query,
+                   
+                
+                "fields" : ["id^1", "type^2", "body", "repro_Steps","description", "title^10", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
+            }
+            }
+				
+        ]
+    }
+    }
+}
 class MovieHitsTable extends React.Component {
 
 
@@ -146,7 +166,18 @@ class MovieHitsTable extends React.Component {
                     </span>)
                     : (<span>   </span>)}
                 </div>
+              <div>
+                  {hit.highlight && hit.highlight.repro_Steps ? (
 
+                    <span>
+                      {hit.highlight.repro_Steps.map(function (_highlight, j) {
+
+                        return <div key={j}><span key={j} dangerouslySetInnerHTML={{ __html: _highlight }} /></div>
+                      })}
+
+                    </span>)
+                    : (<span>   </span>)}
+                </div>
 
                 <div>
 
@@ -192,9 +223,9 @@ const App = () => (
         <SearchBox
 
           placeholder="Search here ..."
-          autofocus={true}
+          autofocus={true}   queryBuilder={customQueryBuilder}
           searchOnChange={true}
-          prefixQueryFields={["id^1", "type^2", "body", "title^10", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
+          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps","repro_steps","description","comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
       </TopBar>
       <LayoutBody>
         <SideBar>
@@ -239,27 +270,14 @@ const App = () => (
             id="versionTagsId" />
 
 
-
-
-
-
-
           <Panel title="TFS refinement" collapsable={true} defaultCollapsed={true}>
             <HierarchicalMenuFilter
               fields={["product_not_an", "area_path_not_an", "state_not_an"]} title=" " id="area_Path_id"
               />
           </Panel>
 
-
-
-
-
-
-
         </SideBar>
         <LayoutResults>
-
-
 
           <div className="divLogoClass"><img id="logo" src="logo.png" /></div>
           <ActionBar>
@@ -280,9 +298,8 @@ const App = () => (
 
           <div>
 
-            <Hits hitsPerPage={10} highlightFields={["title", "body", "comments.body"]}
-              sourceFilter={["title", "url", "comments.body", "comments", "id", "wikiSpaceKey", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
-
+            <Hits hitsPerPage={10} highlightFields={["title", "body","repro_Steps","repro_steps","description", "comments.body"]}
+              sourceFilter={["title", "url", "comments.body", "comments", "id", "repro_Steps","repro_steps","wikiSpaceKey", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
               listComponent={MovieHitsTable}
               />
 
@@ -297,3 +314,6 @@ const App = () => (
 )
 
 ReactDOM.render(<App />, document.getElementById('root'))
+
+
+
