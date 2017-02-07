@@ -3,7 +3,9 @@
 
 
 //const searchkit = new Searchkit.SearchkitManager("http://demo.searchkit.co/api/movies/");
-const searchkit = new Searchkit.SearchkitManager("http://vm-amelastic.clicksoftware.com:9200/ent_index,tfs_index/");
+const searchkit = new Searchkit.SearchkitManager("http://vm-amelastic.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index/");
+
+
 const Hits = Searchkit.Hits;
 const NoHits = Searchkit.NoHits;
 const Pagination = Searchkit.Pagination;
@@ -47,19 +49,19 @@ const customQueryBuilder = (query, options) => {
 
   return {
     "bool": {
-        "should": [
-            { 
-                    "query_string": {
-                    "query": query,
-                   
-                
-                "fields" : ["id^1", "type^2", "body", "repro_Steps","description", "title^10", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
-            }
-            }
-				
-        ]
+      "should": [
+        {
+          "query_string": {
+            "query": query,
+
+
+            "fields": ["id^1", "type^2", "body", "repro_Steps", "description", "title^10", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
+          }
+        }
+
+      ]
     }
-    }
+  }
 }
 class MovieHitsTable extends React.Component {
 
@@ -107,19 +109,35 @@ class MovieHitsTable extends React.Component {
             {this.props.hits.map(function (hit, i) {
 
 
+              var _isAttach = false;
+              var _isCase = false;
+
+
               var _caseId = "https://cases.clicksoftware.com/casesview/case?id=";
 
-              if (hit._source.caseNumber) {
+              var _attachUrl = "https://cksw.my.salesforce.com/";
+
+              if (hit._source.caseNumber && hit._source.type == 'case') {
 
                 wikiNumber = hit._source.caseNumber;
                 _caseId = _caseId + hit._id;
+                _isCase = true;
 
-              }
-              else {
+              } else
+                if (hit._source.caseNumber && hit._source.type == 'attachment') {
 
-                wikiNumber = hit._id;
+                  wikiNumber = hit._source.caseNumber;
+                  _caseId = _caseId + hit._source.parentId;
+                  _isAttach = true;
+                  _attachUrl = "https://cksw.my.salesforce.com/" + hit._id;
 
-              }
+                }
+                else {
+
+                  wikiNumber = hit._id;
+
+                }
+
 
               var _desc = "";
 
@@ -127,6 +145,9 @@ class MovieHitsTable extends React.Component {
 
                 _desc = "(SE Documentation)";
 
+              }else if(hit._source.caseNumber && hit._source.type == 'attachment'){
+
+                  _desc="";
               }
               else {
                 _desc = "(" + hit._source.type + ") - " + wikiNumber
@@ -136,23 +157,43 @@ class MovieHitsTable extends React.Component {
 
               return <div key={i}>
 
-                <a href={hit._source.url} target="_blank" key={i}>
-                  <h3 key={i}>
-                    {hit.highlight && hit.highlight.title ? (
+                <span>
+                  {hit._source.caseNumber && _isAttach ? (
+                    <a href={hit._source.url} target="_blank" key={i}>
+                      <h3 key={i}>Attachment of Case: {hit._source.caseNumber} 
+                        {hit.highlight && hit.highlight.title ? (
 
-                      <span>
-                        {hit.highlight.title.map(function (_highlight, j) {
+                          <span>
+                            {hit.highlight.title.map(function (_highlight, j) {
 
-                          return <div key={j}><span key={j} dangerouslySetInnerHTML={{ __html: _highlight }} /></div>
-                        })}
+                              return <div key={j}><span key={j} dangerouslySetInnerHTML={{ __html: _highlight }} /></div>
+                            })}
 
-                      </span>)
-                      : <span>{hit._source.title}</span>}
-                  </h3>
-                  <span className="spanTypeResult">{_desc}</span>
+                          </span>)
+                          : <span>{hit._source.title}</span>}
+                      </h3>
+                      <span className="spanTypeResult">{_desc}</span>
+                    </a>
+                  ) : (
 
-                </a>
+                      <a href={hit._source.url} target="_blank" key={i}>
+                        <h3 key={i}>
+                          {hit.highlight && hit.highlight.title ? (
 
+                            <span>
+                              {hit.highlight.title.map(function (_highlight, j) {
+
+                                return <div key={j}><span key={j} dangerouslySetInnerHTML={{ __html: _highlight }} /></div>
+                              })}
+
+                            </span>)
+                            : <span>{hit._source.title}</span>}
+                        </h3>
+                        <span className="spanTypeResult">{_desc}</span>
+                      </a>
+
+                    )}
+                </span>
 
                 <div>
                   {hit.highlight && hit.highlight.body ? (
@@ -166,7 +207,7 @@ class MovieHitsTable extends React.Component {
                     </span>)
                     : (<span>   </span>)}
                 </div>
-              <div>
+                <div>
                   {hit.highlight && hit.highlight.repro_Steps ? (
 
                     <span>
@@ -194,10 +235,19 @@ class MovieHitsTable extends React.Component {
                     : (<span>   </span>)}
                 </div>
                 <span>
-                  {hit._source.caseNumber ? (
+                  {hit._source.caseNumber && _isCase ? (
                     <div>
-                        <span className="span_open_case"><a href={hit._source.url} target="_blank" key={i}>open case</a> </span>
-                    <span className="span_open_portal"><a href={_caseId} target="_blank" >open in portal</a> </span>
+                      <span className="span_open_case"><a href={hit._source.url} target="_blank" key={i}>open case</a> </span>
+                      <span className="span_open_portal"><a href={_caseId} target="_blank" >open in portal</a> </span>
+                    </div>)
+                    : (<span>   </span>)}
+                </span>
+                <span>
+                  {hit._source.caseNumber && _isAttach ? (
+                    <div>
+                      <span className="span_open_case"><a href={hit._source.url} target="_blank" key={i}>open case in sfdc</a> </span>
+                      <span className="span_open_portal"><a href={_attachUrl} target="_blank" >open attachment in sfdc</a> </span>
+                      <span className="span_open_portal"><a href={_caseId} target="_blank" >open case in portal</a> </span>
                     </div>)
                     : (<span>   </span>)}
                 </span>
@@ -223,9 +273,9 @@ const App = () => (
         <SearchBox
 
           placeholder="Search here ..."
-          autofocus={true}   queryBuilder={customQueryBuilder}
+          autofocus={true} queryBuilder={customQueryBuilder}
           searchOnChange={true}
-          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps","repro_steps","description","comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
+          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps", "repro_steps", "description", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
       </TopBar>
       <LayoutBody>
         <SideBar>
@@ -269,11 +319,12 @@ const App = () => (
             size={5}
             id="versionTagsId" />
 
+         
 
           <Panel title="TFS refinement" collapsable={true} defaultCollapsed={true}>
-            <HierarchicalMenuFilter
+            <HierarchicalMenuFilter size={999}
               fields={["product_not_an", "area_path_not_an", "state_not_an"]} title=" " id="area_Path_id"
-              />
+            />
           </Panel>
 
         </SideBar>
@@ -298,10 +349,10 @@ const App = () => (
 
           <div>
 
-            <Hits hitsPerPage={10} highlightFields={["title", "body","repro_Steps","repro_steps","description", "comments.body"]}
-              sourceFilter={["title", "url", "comments.body", "comments", "id", "repro_Steps","repro_steps","wikiSpaceKey", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
+            <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body"]}
+              sourceFilter={["title","application_name","extension_type", "url", "comments.body", "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
               listComponent={MovieHitsTable}
-              />
+            />
 
           </div>
 

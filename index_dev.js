@@ -5,7 +5,7 @@ var express = require('express');
 
 
 
-var http = require('http'),
+//var http = require('http'),
   session = require('express-session'),
   auth = require('./auth_dev');;
 var cookieParser = require('cookie-parser');
@@ -31,7 +31,30 @@ var genuuid = require('./genuuid');
 
 var SearchkitExpress = require("searchkit-express");
 
-var server = http.createServer(app);
+//var server = http.createServer(app);
+
+
+var https = require('https');
+const fs = require('fs');
+
+const options = {
+  pfx: fs.readFileSync('./wildcard.pfx'),
+  phassphrase: '1234'
+};
+
+const optionsPem ={
+  cert: './wildcard.pem',
+  key: './wildcard.pem',
+  passphrase: '1234'
+};
+ var options2 = {
+      key: fs.readFileSync('./key.pem', 'utf8'),
+      cert: fs.readFileSync('./server.crt', 'utf8'),
+      phassphrase: '1234'
+   };
+
+
+var server= https.createServer(options2, app);
 
 
 
@@ -91,4 +114,6 @@ app.get('*', function(req, res){
   res.redirect('/');
 });
 */
-app.listen(process.env.PORT || 3001);
+//app.listen(process.env.PORT || 3001);
+
+server.listen(process.env.PORT || 3001);

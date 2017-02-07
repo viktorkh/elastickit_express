@@ -5,9 +5,13 @@ var express = require('express');
 
 
 
-var http = require('http'),
-  session = require('express-session'),
-  auth = require('./auth');;
+var http = require('http');
+  var session = require('express-session'),
+  auth = require('./auth');
+
+
+var https = require('https');
+
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compression = require('compression');
@@ -16,7 +20,7 @@ var multer = require('multer');
 var path    = require("path");
 var app = express();
 
-
+const fs = require('fs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname + '/public'));
@@ -31,8 +35,7 @@ var genuuid = require('./genuuid');
 
 var SearchkitExpress = require("searchkit-express");
 
-var server = http.createServer(app);
-
+//var server = http.createServer(app);
 
 
 
@@ -91,4 +94,6 @@ app.get('*', function(req, res){
   res.redirect('/');
 });
 */
+
 app.listen(process.env.PORT || 3001);
+

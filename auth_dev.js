@@ -32,7 +32,7 @@ passport.deserializeUser(function(id, done) {
 
 passport.use('saml', new SamlStrategy(
   {
-    issuer: "http://localhost:3001",
+    issuer: "https://localhost:3001",
   	path: '/login/callback',
     protocol: 'http://',
     entryPoint: 'https://clicksoftware.okta.com/app/clicksoftware_searchkitsb_2/exkab2q9jw18E0zlF0x7/sso/saml',
