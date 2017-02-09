@@ -3,7 +3,7 @@
 
 
 //const searchkit = new Searchkit.SearchkitManager("http://demo.searchkit.co/api/movies/");
-const searchkit = new Searchkit.SearchkitManager("http://vm-amelastic.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index/");
+const searchkit = new Searchkit.SearchkitManager("http://vm-amelastic-pr.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index,domino_index/");
 
 
 const Hits = Searchkit.Hits;
@@ -55,7 +55,7 @@ const customQueryBuilder = (query, options) => {
             "query": query,
 
 
-            "fields": ["id^1", "type^2", "body", "repro_Steps", "description", "title^10", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
+            "fields": ["id^1", "type^2", "body", "repro_Steps", "description", "title^10", "comments","wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
           }
         }
 
@@ -111,11 +111,13 @@ class MovieHitsTable extends React.Component {
 
               var _isAttach = false;
               var _isCase = false;
-
+              var _downloads=false;
 
               var _caseId = "https://cases.clicksoftware.com/casesview/case?id=";
 
               var _attachUrl = "https://cksw.my.salesforce.com/";
+              var _desc = "";
+
 
               if (hit._source.caseNumber && hit._source.type == 'case') {
 
@@ -124,12 +126,19 @@ class MovieHitsTable extends React.Component {
                 _isCase = true;
 
               } else
-                if (hit._source.caseNumber && hit._source.type == 'attachment') {
+                if (hit._source.caseNumber && hit._source.type == 'case_attachments') {
 
                   wikiNumber = hit._source.caseNumber;
                   _caseId = _caseId + hit._source.parentId;
                   _isAttach = true;
                   _attachUrl = "https://cksw.my.salesforce.com/" + hit._id;
+
+                }
+                else
+                if ( hit._source.type == 'downloads') {
+
+                  _downloads = true;
+                  wikiNumber = "";
 
                 }
                 else {
@@ -139,16 +148,21 @@ class MovieHitsTable extends React.Component {
                 }
 
 
-              var _desc = "";
+         
 
               if (hit._source.wikiSpaceKey && (hit._source.wikiSpaceKey == 'PUBC9D' || hit._source.wikiSpaceKey == 'PUBSSUD')) {
 
                 _desc = "(SE Documentation)";
 
-              }else if(hit._source.caseNumber && hit._source.type == 'attachment'){
+              }else if(hit._source.caseNumber && hit._source.type == 'case_attachments'){
 
                   _desc="";
               }
+              else if(hit._source.type == 'downloads'){
+
+                  _desc="(Clicksoftware "+ hit._source.type + ")";
+              }
+              
               else {
                 _desc = "(" + hit._source.type + ") - " + wikiNumber
 
@@ -236,6 +250,20 @@ class MovieHitsTable extends React.Component {
                     </span>)
                     : (<span>   </span>)}
                 </div>
+                 <div>
+
+
+                  {hit.highlight && hit.highlight['name'] ? (
+
+                    <span>
+                      {hit.highlight['name'].map(function (_highlight1, d) {
+
+                        return <div key={d}><span key={d} dangerouslySetInnerHTML={{ __html: _highlight1 }} /></div>
+                      })}
+
+                    </span>)
+                    : (<span>   </span>)}
+                </div>
                 <span>
                   {hit._source.caseNumber && _isCase ? (
                     <div>
@@ -253,6 +281,7 @@ class MovieHitsTable extends React.Component {
                     </div>)
                     : (<span>   </span>)}
                 </span>
+              
                 <br />
               </div>
 
@@ -277,11 +306,14 @@ const App = () => (
           placeholder="Search here ..."
           autofocus={true} queryBuilder={customQueryBuilder}
           searchOnChange={true}
-          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps", "repro_steps", "description", "comments", "wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
+          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps","name" ,
+          "repro_steps", "description", "comments", "wikiId", "comments.commentId^1",
+           "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
       </TopBar>
       <LayoutBody>
         <SideBar>
-
+          <a className="helpLink" target="_blank" href="https://wiki.clicksoftware.com/display/IWI/Elastic+Search+Syntax+Help">Help</a>
+<br/>
           <RefinementListFilter
             id="typeId"
             title="Types"
@@ -298,8 +330,12 @@ const App = () => (
             prefixQueryFields={["wikiId^1", "id", "caseNumber"]}
             queryFields={["wikiId", "id", "caseNumber"]} />
 
+
+
+      
+
           <RefinementListFilter
-            field="wikiTags.product"
+            field="tag_product_not_an"
             title="Product"
             operator="OR"
             size={5}
@@ -351,8 +387,10 @@ const App = () => (
 
           <div>
 
-            <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body"]}
-              sourceFilter={["title","application_name","name","extension_type", "url", "comments.body", "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
+            <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body","name"]}
+              sourceFilter={["title","application_name","name","extension_type", "url", "comments.body", 
+              "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId",
+               "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
               listComponent={MovieHitsTable}
             />
 
