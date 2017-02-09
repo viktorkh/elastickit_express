@@ -98,3 +98,23 @@ padding: 5px;
 padding: 5px;
      
   }
+
+   .imgHelp img{
+
+
+padding-right: 15px;
+
+
+
+  }
+
+  #left { float:right }
+#right { float:right }
+
+.helpLink{
+
+
+  text-align: right;
+  float:right ;
+color: #08c;
+}

@@ -160,7 +160,8 @@ class MovieHitsTable extends React.Component {
                 <span>
                   {hit._source.caseNumber && _isAttach ? (
                     <a href={hit._source.url} target="_blank" key={i}>
-                      <h3 key={i}>Attachment of Case: {hit._source.caseNumber} 
+                      <h3 key={i}>Attachment in Case:  {hit._source.caseNumber} 
+                     <br/>
                         {hit.highlight && hit.highlight.title ? (
 
                           <span>
@@ -172,6 +173,7 @@ class MovieHitsTable extends React.Component {
                           </span>)
                           : <span>{hit._source.title}</span>}
                       </h3>
+                     ({hit._source.name})
                       <span className="spanTypeResult">{_desc}</span>
                     </a>
                   ) : (
@@ -350,7 +352,7 @@ const App = () => (
           <div>
 
             <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body"]}
-              sourceFilter={["title","application_name","extension_type", "url", "comments.body", "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
+              sourceFilter={["title","application_name","name","extension_type", "url", "comments.body", "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId", "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
               listComponent={MovieHitsTable}
             />
 
