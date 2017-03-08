@@ -3,6 +3,8 @@ var passport = require('passport'),
   SamlStrategy = require('passport-saml').Strategy,
   config = require('./config.json');
 
+var _orig_url = require('./orig_url');
+
 var users = [];
 
 function findByEmail(email, fn) {
@@ -59,6 +61,14 @@ passport.use('saml', new SamlStrategy(
 ));
 
 passport.protected = function(req, res, next) {
+
+
+
+  if( req.originalUrl.indexOf('/sale') > -1){
+
+    _orig_url.setUrl(req.originalUrl);
+  }
+
   if (req.isAuthenticated()) {
     return next();
   }

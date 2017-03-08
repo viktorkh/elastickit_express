@@ -27,7 +27,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static('./public'));
 app.use(express.static('public'));
 
-
+var _orig_url = require('./orig_url');
 
 var genuuid = require('./genuuid');
 
@@ -82,6 +82,11 @@ app.use(auth.protected);
 app.get('/', auth.protected, function (req, res){
 	  //res.end("Hello " + req.session.passport.user);
      
+     if(_orig_url.getUrl().length > 0)
+      {
+        res.redirect(_orig_url.getUrl());
+      }  
+
      res.sendFile(path.join(__dirname+'/index.html'));
       
 });
