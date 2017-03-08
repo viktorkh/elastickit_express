@@ -5,9 +5,13 @@ var express = require('express');
 
 
 
-//var http = require('http'),
-  session = require('express-session'),
-  auth = require('./auth_dev');;
+var http = require('http');
+  var session = require('express-session'),
+  auth = require('./auth_dev');
+
+
+var https = require('https');
+
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compression = require('compression');
@@ -16,7 +20,7 @@ var multer = require('multer');
 var path    = require("path");
 var app = express();
 
-
+const fs = require('fs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname + '/public'));
@@ -32,30 +36,6 @@ var genuuid = require('./genuuid');
 var SearchkitExpress = require("searchkit-express");
 
 //var server = http.createServer(app);
-
-
-var https = require('https');
-const fs = require('fs');
-
-const options = {
-  pfx: fs.readFileSync('./wildcard.pfx'),
-  phassphrase: '1234'
-};
-
-const optionsPem ={
-  cert: './wildcard.pem',
-  key: './wildcard.pem',
-  passphrase: '1234'
-};
- var options2 = {
-      key: fs.readFileSync('./key.pem', 'utf8'),
-      cert: fs.readFileSync('./server.crt', 'utf8'),
-      phassphrase: '1234'
-   };
-
-
-var server= https.createServer(options2, app);
-
 
 
 
@@ -106,14 +86,33 @@ app.get('/', auth.protected, function (req, res){
       
 });
 
-app.get('/hello', auth.protected, function (req, res){
-	  res.end("Hello World!");
+app.get('/tech', auth.protected, function (req, res){
+	   res.sendFile(path.join(__dirname+'/tech.html'));
+});
+
+app.get('/sales', auth.protected, function (req, res){
+	   res.sendFile(path.join(__dirname+'/sales.html'));
+});
+app.get('/sale/', auth.protected, function (req, res){
+	   res.sendFile(path.join(__dirname+'/sales.html'));
 });
 /*
 app.get('*', function(req, res){
   res.redirect('/');
 });
 */
+
 //app.listen(process.env.PORT || 3001);
 
-server.listen(process.env.PORT || 3001);
+var options = {
+      key: fs.readFileSync('./key.pem', 'utf8'),
+      cert: fs.readFileSync('./server.crt', 'utf8'),
+      phassphrase: '1234'
+   };
+
+
+
+
+var serverHttps= https.createServer(options, app);
+serverHttps.listen(443);
+app.listen(80);

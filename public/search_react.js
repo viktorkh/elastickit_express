@@ -1,49 +1,34 @@
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+
+
+import { extend } from 'lodash';
+import './index.css';
+
+import {
+  SearchkitManager, SearchkitProvider, Searchkit,
+  SearchBox, RefinementListFilter, Pagination, Hits,
+  HierarchicalMenuFilter, HitsStats, SortingSelector, NoHits,
+  ResetFilters, RangeFilter, NumericRefinementListFilter,
+  ViewSwitcherHits, ViewSwitcherToggle, DynamicRangeFilter,
+  InputFilter, GroupedSelectedFilters, SelectedFilters,
+  InitialLoader, PaginationSelect, CheckboxFilter, TermQuery,
+  Panel, ImmutableQuery, QueryString, Layout, TopBar, LayoutBody, LayoutResults,
+  ActionBar, ActionBarRow, SideBar
+} from 'searchkit';
 
 
 
+const host = "https://vm-amelastic.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index,domino_index/";
 
-//const searchkit = new Searchkit.SearchkitManager("http://demo.searchkit.co/api/movies/");
-const searchkit = new Searchkit.SearchkitManager("https://es-test.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index,domino_index/");
-
-
-const Hits = Searchkit.Hits;
-const NoHits = Searchkit.NoHits;
-const Pagination = Searchkit.Pagination;
-const Layout = Searchkit.Layout;
-const TopBar = Searchkit.TopBar;
-const SearchBox = Searchkit.SearchBox;
-const LayoutBody = Searchkit.LayoutBody;
-const SideBar = Searchkit.SideBar;
-const HierarchicalMenuFilter = Searchkit.HierarchicalMenuFilter;
-const RefinementListFilter = Searchkit.RefinementListFilter;
-const LayoutResults = Searchkit.LayoutResults;
-const ActionBar = Searchkit.ActionBar;
-const HitsStats = Searchkit.HitsStats;
-const SelectedFilters = Searchkit.SelectedFilters;
-const ResetFilters = Searchkit.ResetFilters;
-const SearchkitProvider = Searchkit.SearchkitProvider;
-const Searchbox = Searchkit.SearchBox;
-const SortingSelector = Searchkit.SortingSelector;
-const ActionBarRow = Searchkit.ActionBarRow;
-const InputFilter = Searchkit.InputFilter;
-
-const MovieHitsGridItem = Searchkit.MovieHitsGridItem;
-const ExampleHitsItem = Searchkit.ExampleHitsItem;
-
-const InitialLoader = Searchkit.InitialLoader;
+const searchkit = new SearchkitManager(host);
 
 
-const PaginationSelect = Searchkit.PaginationSelect;
+//import BurgerMenu from 'react-burger-menu';
+var Menu = require('react-burger-menu').slide;
+//var Menu = BurgerMenu.slide;
 
 
-const CheckboxFilter = Searchkit.CheckboxFilter;
-const TermQuery = Searchkit.TermQuery;
-
-const Panel = Searchkit.Panel;
-const GroupedSelectedFilters = Searchkit.GroupedSelectedFilters;
-
-const ImmutableQuery = Searchkit.ImmutableQuery;
-const QueryString = Searchkit.QueryString;
 
 const customQueryBuilder = (query, options) => {
 
@@ -55,7 +40,7 @@ const customQueryBuilder = (query, options) => {
             "query": query,
 
 
-            "fields": ["id^1", "type^2", "body", "repro_Steps", "description", "title^10", "comments","wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
+            "fields": ["id", "body", "replies.records.body", "repro_Steps", "description", "title^2", "wikiId", "casenumber", "comments.body", "wikiTags.product"]
           }
         }
 
@@ -111,7 +96,7 @@ class MovieHitsTable extends React.Component {
 
               var _isAttach = false;
               var _isCase = false;
-              var _downloads=false;
+              var _downloads = false;
 
               var _caseId = "https://cases.clicksoftware.com/casesview/case?id=";
 
@@ -135,34 +120,39 @@ class MovieHitsTable extends React.Component {
 
                 }
                 else
-                if ( hit._source.type == 'downloads') {
+                  if (hit._source.type == 'downloads') {
 
-                  _downloads = true;
-                  wikiNumber = "";
+                    _downloads = true;
+                    wikiNumber = "";
 
-                }
-                else {
+                  }
+                  else {
 
-                  wikiNumber = hit._id;
+                    wikiNumber = hit._id;
 
-                }
+                  }
 
 
-         
+
 
               if (hit._source.wikiSpaceKey && (hit._source.wikiSpaceKey == 'PUBC9D' || hit._source.wikiSpaceKey == 'PUBSSUD')) {
 
                 _desc = "(SE Documentation)";
 
-              }else if(hit._source.caseNumber && hit._source.type == 'case_attachments'){
+              } else if (hit._source.caseNumber && hit._source.type == 'case_attachments') {
 
-                  _desc="";
+                _desc = "";
               }
-              else if(hit._source.type == 'downloads'){
+              else if (hit._source.type == 'downloads') {
 
-                  _desc="(Clicksoftware "+ hit._source.type + ")";
+                _desc = "(Clicksoftware " + hit._source.type + ")";
               }
-              
+
+              else if (hit._source.type == 'implementation_forum') {
+
+                _desc = "(Implementation forum)";
+              }
+
               else {
                 _desc = "(" + hit._source.type + ") - " + wikiNumber
 
@@ -174,8 +164,8 @@ class MovieHitsTable extends React.Component {
                 <span>
                   {hit._source.caseNumber && _isAttach ? (
                     <a href={hit._source.url} target="_blank" key={i}>
-                      <h3 key={i}>Attachment in Case:  {hit._source.caseNumber} 
-                     <br/>
+                      <h3 key={i}>Attachment in Case:  {hit._source.caseNumber}
+                        <br />
                         {hit.highlight && hit.highlight.title ? (
 
                           <span>
@@ -187,7 +177,7 @@ class MovieHitsTable extends React.Component {
                           </span>)
                           : <span>{hit._source.title}</span>}
                       </h3>
-                     ({hit._source.name})
+                      ({hit._source.name})
                       <span className="spanTypeResult">{_desc}</span>
                     </a>
                   ) : (
@@ -250,7 +240,21 @@ class MovieHitsTable extends React.Component {
                     </span>)
                     : (<span>   </span>)}
                 </div>
-                 <div>
+                <div>
+
+
+                  {hit.highlight && hit.highlight['replies.records.body'] ? (
+
+                    <span>
+                      {hit.highlight['replies.records.body'].map(function (_highlight1, d) {
+
+                        return <div key={d}><span key={d} dangerouslySetInnerHTML={{ __html: _highlight1 }} /></div>
+                      })}
+
+                    </span>)
+                    : (<span>   </span>)}
+                </div>
+                <div>
 
 
                   {hit.highlight && hit.highlight['name'] ? (
@@ -281,7 +285,7 @@ class MovieHitsTable extends React.Component {
                     </div>)
                     : (<span>   </span>)}
                 </span>
-              
+
                 <br />
               </div>
 
@@ -295,116 +299,124 @@ class MovieHitsTable extends React.Component {
   }
 }
 
-const App = () => (
 
-  <SearchkitProvider searchkit={searchkit}>
-    <Layout>
-      <TopBar>
+class App extends Component {
+  render() {
+    return (
 
-        <SearchBox
+      <SearchkitProvider searchkit={searchkit}>
+        <Layout>
+          <TopBar>
 
-          placeholder="Search here ..."
-          autofocus={true} queryBuilder={customQueryBuilder}
-          searchOnChange={true}
-          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps","name" ,
-          "repro_steps", "description", "comments", "wikiId", "comments.commentId^1",
-           "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
-      </TopBar>
-      <LayoutBody>
-        <SideBar>
-          <a className="helpLink" target="_blank" href="https://wiki.clicksoftware.com/display/IWI/Elastic+Search+Syntax+Help">Help</a>
-<br/>
-          <RefinementListFilter
-            id="typeId"
-            title="Types"
-            field="type"
-            operator="OR"
-            size={10} />
+            <SearchBox
+
+              placeholder="Search here ..."
+              autofocus={true} queryBuilder={customQueryBuilder}
+              searchOnChange={false}
+              prefixQueryFields={["id^1", "body", "title^2", "repro_Steps", "name", "replies.records.body",
+                "repro_steps", "description", "comments", "wikiId", "comments.commentId^1",
+                "caseNumber^1", "comments.body"]} />
+          </TopBar>
+
+          <LayoutBody>
 
 
-          <InputFilter
-            id="Id_unique_search"
-            title="ID Search "
-            placeholder="Search by ID"
-            searchOnChange={true}
-            prefixQueryFields={["wikiId^1", "id", "caseNumber"]}
-            queryFields={["wikiId", "id", "caseNumber"]} />
+            <Menu left isOpen={false}  >
 
 
-
-      
-
-          <RefinementListFilter
-            field="tag_product_not_an"
-            title="Product"
-            operator="OR"
-            size={5}
-            id="productTagsId" />
-
-
-          <RefinementListFilter
-            field="tag_hub_not_an"
-            title="Hub"
-            operator="OR"
-            size={5}
-            id="hubTagsId" />
+              <a className="helpLink" target="_blank" href="https://wiki.clicksoftware.com/display/IWI/Elastic+Search+Syntax+Help">Help</a>
+              <br />
+              <RefinementListFilter
+                id="typeId"
+                title="Types"
+                field="type"
+                operator="OR"
+                size={10} />
 
 
-          <RefinementListFilter
-            field="tag_version_not_an"
-            title="Version"
-            operator="OR"
-            size={5}
-            id="versionTagsId" />
-
-         
-
-          <Panel title="TFS refinement" collapsable={true} defaultCollapsed={true}>
-            <HierarchicalMenuFilter size={999}
-              fields={["product_not_an", "area_path_not_an", "state_not_an"]} title=" " id="area_Path_id"
-            />
-          </Panel>
-
-        </SideBar>
-        <LayoutResults>
-
-          <div className="divLogoClass"><img id="logo" src="logo.png" /></div>
-          <ActionBar>
-
-            <ActionBarRow>
-
-              <HitsStats />
-            </ActionBarRow>
-
-            <ActionBarRow>
-              <GroupedSelectedFilters />
-              <ResetFilters />
-            </ActionBarRow>
-
-          </ActionBar>
-
-          <Pagination className={"testClass"} showNumbers={true} />
-
-          <div>
-
-            <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body","name"]}
-              sourceFilter={["title","application_name","name","extension_type", "url", "comments.body", 
-              "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId",
-               "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
-              listComponent={MovieHitsTable}
-            />
-
-          </div>
-
-          <NoHits />
-
-        </LayoutResults>
-      </LayoutBody>
-    </Layout>
-  </SearchkitProvider>
-)
-
-ReactDOM.render(<App />, document.getElementById('root'))
+              <InputFilter
+                id="Id_unique_search"
+                title="ID Search "
+                placeholder="Search by ID"
+                searchOnChange={true}
+                prefixQueryFields={["wikiId^1", "id", "caseNumber"]}
+                queryFields={["wikiId", "id", "caseNumber"]} />
 
 
 
+
+
+              <RefinementListFilter
+                field="tag_product_not_an"
+                title="Product"
+                operator="OR"
+                size={5}
+                id="productTagsId" />
+
+
+              <RefinementListFilter
+                field="tag_hub_not_an"
+                title="Hub"
+                operator="OR"
+                size={5}
+                id="hubTagsId" />
+
+
+              <RefinementListFilter
+                field="tag_version_not_an"
+                title="Version"
+                operator="OR"
+                size={5}
+                id="versionTagsId" />
+
+
+
+              <Panel title="TFS refinement" collapsable={true} defaultCollapsed={true}>
+                <HierarchicalMenuFilter size={999}
+                  fields={["product_not_an", "area_path_not_an", "state_not_an"]} title=" " id="area_Path_id"
+                />
+              </Panel>
+            </Menu>
+            <LayoutResults>
+
+              <div className="divLogoClass"><img id="logo" src="logo.png" /></div>
+              <ActionBar>
+
+                <ActionBarRow>
+
+                  <HitsStats />
+                </ActionBarRow>
+
+                <ActionBarRow>
+                  <GroupedSelectedFilters />
+                  <ResetFilters />
+                </ActionBarRow>
+
+              </ActionBar>
+
+              <Pagination className={"testClass"} showNumbers={true} />
+
+              <div>
+
+                <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body", "name", "replies.records.body"]}
+                  sourceFilter={["title", "application_name", "name", "extension_type", "url", "comments.body",
+                    "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId", "replies.records.body",
+                    "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
+                  listComponent={MovieHitsTable}
+                />
+
+              </div>
+
+              <NoHits />
+
+            </LayoutResults>
+          </LayoutBody>
+        </Layout>
+      </SearchkitProvider>
+
+
+    );
+  }
+}
+
+export default App;

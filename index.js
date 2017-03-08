@@ -86,8 +86,15 @@ app.get('/', auth.protected, function (req, res){
       
 });
 
-app.get('/hello', auth.protected, function (req, res){
-	  res.end("Hello World!");
+app.get('/tech', auth.protected, function (req, res){
+	   res.sendFile(path.join(__dirname+'/tech.html'));
+});
+
+app.get('/sales', auth.protected, function (req, res){
+	   res.sendFile(path.join(__dirname+'/sales.html'));
+});
+app.get('/sale/', auth.protected, function (req, res){
+	   res.sendFile(path.join(__dirname+'/sales.html'));
 });
 /*
 app.get('*', function(req, res){
@@ -95,5 +102,17 @@ app.get('*', function(req, res){
 });
 */
 
-app.listen(process.env.PORT || 3001);
+//app.listen(process.env.PORT || 3001);
 
+var options = {
+      key: fs.readFileSync('./key.pem', 'utf8'),
+      cert: fs.readFileSync('./server.crt', 'utf8'),
+      phassphrase: '1234'
+   };
+
+
+
+
+var serverHttps= https.createServer(options, app);
+serverHttps.listen(443);
+app.listen(80);

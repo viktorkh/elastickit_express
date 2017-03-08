@@ -32,12 +32,12 @@ passport.deserializeUser(function(id, done) {
 
 passport.use('saml', new SamlStrategy(
   {
-    issuer: "http://localhost:3001",
+    issuer: "https://es-test.clicksoftware.com",
   	path: '/login/callback',
     protocol: 'http://',
-    entryPoint: config.auth.entryPoint,
+    entryPoint: "https://clicksoftware.okta.com/app/clicksoftware_searchkitsb_3/exkaz9h2eggRau4El0x7/sso/saml",
    // cert: config.auth.cert
-   cert:fs.readFileSync('./okta.cert', 'utf-8')
+   cert:fs.readFileSync('./okta_elastic.cert', 'utf-8')
   },
   function(profile, done) {
     if (!profile.email) {
