@@ -18,6 +18,7 @@ var compression = require('compression');
 var morgan = require('morgan');
 var multer = require('multer');
 var path    = require("path");
+var device = require('express-device');
 var app = express();
 
 const fs = require('fs');
@@ -31,7 +32,7 @@ var _orig_url = require('./orig_url');
 
 var genuuid = require('./genuuid');
 
-
+app.use(device.capture());
 
 var SearchkitExpress = require("searchkit-express");
 
@@ -76,6 +77,12 @@ app.get('/login', auth.authenticate('saml', { failureRedirect: '/', failureFlash
   }
 );
 
+
+app.get('/hello',function(req,res) {
+  res.send("Hi to "+req.device.type.toUpperCase()+" User");
+});
+
+
 //required to be after /login /post urls or else it will be endless redirects
 app.use(auth.protected);
 
@@ -87,7 +94,13 @@ app.get('/', auth.protected, function (req, res){
         res.redirect(_orig_url.getUrl());
       }  
 
-     res.sendFile(path.join(__dirname+'/index.html'));
+     if(req.device.type.toUpperCase().indexOf('DESKTOP')>-1){
+
+          res.sendFile(path.join(__dirname+'/index.html'));
+      }else{
+        
+          res.sendFile(path.join(__dirname+'/mobile_tech.html'));
+      }
       
 });
 

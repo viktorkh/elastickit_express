@@ -3,7 +3,7 @@
 
 
 //const searchkit = new Searchkit.SearchkitManager("http://demo.searchkit.co/api/movies/");
-const searchkit = new Searchkit.SearchkitManager("https://es-test.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index,domino_index/");
+const searchkit = new Searchkit.SearchkitManager("https://vm-amelastic.clicksoftware.com:9200/ent_index,tfs_index,documentation_v8_3_patch010_index,attach_index,domino_index/");
 
 
 const Hits = Searchkit.Hits;
@@ -55,7 +55,7 @@ const customQueryBuilder = (query, options) => {
             "query": query,
 
 
-            "fields": ["id^1", "type^2", "body", "repro_Steps", "description", "title^10", "comments","wikiId", "comments.commentId^1", "casenumber^1", "comments.body^10", "wikiTags.product^10"]
+            "fields": ["id^2",  "body","replies.records.body", "repro_Steps", "description", "title^2", "wikiId", "comments.commentId^1", "caseNumber^1", "comments.body", "wikiTags.product"]
           }
         }
 
@@ -306,9 +306,9 @@ const App = () => (
           placeholder="Search here ..."
           autofocus={true} queryBuilder={customQueryBuilder}
           searchOnChange={true}
-          prefixQueryFields={["id^1", "type^2", "body", "title^10", "repro_Steps","name" ,
-          "repro_steps", "description", "comments", "wikiId", "comments.commentId^1",
-           "casenumber^1", "comments.body^10", "wikiTags.product^10"]} />
+         prefixQueryFields={["id",  "body", "title", "repro_Steps","name" ,"replies.records.body",
+          "repro_steps", "description", "wikiId", "comments.commentId",
+           "caseNumber", "comments.body"]}  />
       </TopBar>
       <LayoutBody>
         <SideBar>
@@ -387,12 +387,13 @@ const App = () => (
 
           <div>
 
-            <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body","name"]}
+             <Hits hitsPerPage={10} highlightFields={["title", "body", "repro_Steps", "repro_steps", "description", "comments.body","name","replies.records.body"]}
               sourceFilter={["title","application_name","name","extension_type", "url", "comments.body", 
-              "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId",
+              "comments", "id", "repro_Steps", "repro_steps", "wikiSpaceKey", "parentId","replies.records.body",
                "wikiSpace", "comments.commentId", "type", "casenumber", "caseNumber"]}
               listComponent={MovieHitsTable}
             />
+              
 
           </div>
 

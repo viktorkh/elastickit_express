@@ -19,7 +19,7 @@ var morgan = require('morgan');
 var multer = require('multer');
 var path    = require("path");
 var app = express();
-
+var device = require('express-device');
 const fs = require('fs');
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -38,7 +38,7 @@ var SearchkitExpress = require("searchkit-express");
 //var server = http.createServer(app);
 
 
-
+app.use(device.capture());
 
 var browserify = require('browserify'),
     literalify = require('literalify'),
@@ -75,6 +75,10 @@ app.get('/login', auth.authenticate('saml', { failureRedirect: '/', failureFlash
     res.redirect('/');
   }
 );
+app.get('/hello',function(req,res) {
+  res.send("Hi to "+req.device.type.toUpperCase()+" User");
+});
+
 
 //required to be after /login /post urls or else it will be endless redirects
 app.use(auth.protected);
@@ -82,12 +86,18 @@ app.use(auth.protected);
 app.get('/', auth.protected, function (req, res){
 	  //res.end("Hello " + req.session.passport.user);
      
-      if(_orig_url.getUrl().length > 0)
+     if(_orig_url.getUrl().length > 0)
       {
         res.redirect(_orig_url.getUrl());
       }  
 
-     res.sendFile(path.join(__dirname+'/index.html'));
+     if(req.device.type.toUpperCase().indexOf('DESKTOP')>-1){
+
+          res.sendFile(path.join(__dirname+'/index.html'));
+      }else{
+        
+          res.sendFile(path.join(__dirname+'/mobile_tech.html'));
+      }
       
 });
 
